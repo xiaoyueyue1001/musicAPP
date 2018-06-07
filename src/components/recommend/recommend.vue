@@ -2,7 +2,7 @@
     <div>推荐</div>
 </template>
 <script>
-import { getRecommend } from "common/api/recommend";
+import { getRecommend } from "api/recommend";
 export default {
   created() {
     this._getRecommend();
