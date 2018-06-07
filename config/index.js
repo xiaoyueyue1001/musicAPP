@@ -10,12 +10,13 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
+    //设置反向代理 在开发环境使用本地服务查询ajax的数据
     proxyTable: {
       '/getRecommend': {
         target: 'https://c.y.qq.com/musichall/fcgi-bin/fcg_yqqhomepagerecommend.fcg',
-        changeOrigin: true,
+        changeOrigin: true,//更改源使之可以跨域
         pathRewrite: {
-          '^/getRecommend': ""
+          '^/getRecommend': ""//相当于一个正则，将url中key的部分替换成value
         }
       }
     },
