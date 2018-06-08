@@ -24,7 +24,7 @@ export default {
     },
     interval: {
       type: Number,
-      default: 2000
+      default: 4000
     }
   },
   data() {
@@ -48,6 +48,9 @@ export default {
       this._setSliderWidth();
       this.slider.refresh();
     });
+  },
+  beforeDestroy() {
+    clearTimeout(this.timer);
   },
   methods: {
     //设置轮播图宽度
@@ -87,16 +90,16 @@ export default {
       this.slider.on("scrollEnd", () => {
         let currentPage = this.slider.getCurrentPage().pageX;
         this.currentPage = currentPage;
-
+        //每次切面切换玩进行下一次切换的计时
         if (this.autoPlay) {
           this._play();
         }
       });
     },
     _play() {
+      //设置timeout一次页面跳转一次
       this.timer = setTimeout(() => {
         let currentPage = this.slider.getCurrentPage().pageX;
-        console.log(currentPage);
         this.slider.goToPage((currentPage + 1) % this.dots.length, 0, 400);
       }, this.interval);
     }

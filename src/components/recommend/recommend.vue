@@ -1,26 +1,52 @@
 <template>
-    <div class="recommend">
-      <div class="recommend-content">
-        <div v-if="recommendData.slider" class="slider-wrapper">
+  <div class="recommend">
+    <scroll class="recommend-content" :data='recommendData.songList'>
+      <div>
+        <div class="slider-wrapper" v-if="recommendData.slider">
           <slider>
-              <div v-for="item in recommendData.slider" :key="item.id">
-                <a :href="item.linkUrl">
-                  <img :src="item.picUrl" alt="">
-                </a>
+            <div v-for="item in recommendData.slider" :key="item.id">
+              <a :href="item.linkUrl">
+                <img :src="item.picUrl" alt="">
+              </a>
+            </div>
+          </slider>  
+        </div>
+        <div class="recommend-list" v-if="recommendData.songList">
+          <h1 class="list-title">热门歌单推荐</h1>
+          <ul>
+            <li v-for="(item,index) in songList" :key="index" class="item">
+              <div class="icon">
+                <img :src="item.picUrl" alt="" width="60" height="60">
               </div>
-            </slider>  
+              <div class="text">
+                <h2 class="name">{{item.songListAuthor}}</h2>
+                <h2 class="desc">{{item.songListDesc}}</h2>
+              </div>
+            </li>
+          </ul>
         </div>
       </div>
-    </div>
+    </scroll>
+  </div>
 </template>
 <script>
 import { getRecommend } from "api/recommend";
 import Slider from "base/slider/slider";
+import Scroll from "base/scroll/scroll";
 export default {
   data() {
     return {
       recommendData: {}
     };
+  },
+  computed: {
+    songList() {
+      return [
+        ...this.recommendData.songList,
+        ...this.recommendData.songList,
+        ...this.recommendData.songList
+      ];
+    }
   },
   created() {
     this._getRecommend();
@@ -35,7 +61,8 @@ export default {
     }
   },
   components: {
-    Slider
+    Slider,
+    Scroll
   }
 };
 </script>
