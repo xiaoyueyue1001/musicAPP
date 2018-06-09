@@ -6,7 +6,7 @@
           <slider>
             <div v-for="item in recommendData.slider" :key="item.id">
               <a :href="item.linkUrl">
-                <img :src="item.picUrl" alt="">
+                <img :src="item.picUrl" alt="" class="needsclick">
               </a>
             </div>
           </slider>  
@@ -16,7 +16,7 @@
           <ul>
             <li v-for="(item,index) in songList" :key="index" class="item">
               <div class="icon">
-                <img :src="item.picUrl" alt="" width="60" height="60">
+                <img v-lazy="item.picUrl" alt="" width="60" height="60">
               </div>
               <div class="text">
                 <h2 class="name">{{item.songListAuthor}}</h2>
