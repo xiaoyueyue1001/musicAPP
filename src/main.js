@@ -11,7 +11,9 @@ import 'common/stylus/index.styl'
 /* eslint-disable no-new */
 
 Vue.use(VueLazyLoad, {
-  loading: 'common/image/default.png'
+  loading: require('common/image/default.png'),
+  error: require('common/image/failure.png'),
+  attempt: 1
 })
 
 fastclick.attach(document.body)

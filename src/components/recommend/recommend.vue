@@ -26,6 +26,9 @@
           </ul>
         </div>
       </div>
+      <div class="loading-container">
+        <loading v-show="!recommendData.songList"></loading>
+      </div>
     </scroll>
   </div>
 </template>
@@ -33,6 +36,7 @@
 import { getRecommend } from "api/recommend";
 import Slider from "base/slider/slider";
 import Scroll from "base/scroll/scroll";
+import Loading from "base/loading/loading";
 export default {
   data() {
     return {
@@ -44,12 +48,19 @@ export default {
       return [
         ...this.recommendData.songList,
         ...this.recommendData.songList,
-        ...this.recommendData.songList
+        ...this.recommendData.songList,
+        {
+          picUrl: "11111",
+          songListAuthor: "wangyue",
+          songListDesc: "人造无效地址"
+        }
       ];
     }
   },
   created() {
-    this._getRecommend();
+    setTimeout(() => {
+      this._getRecommend();
+    }, 1000);
   },
   methods: {
     _getRecommend() {
@@ -62,7 +73,8 @@ export default {
   },
   components: {
     Slider,
-    Scroll
+    Scroll,
+    Loading
   }
 };
 </script>
