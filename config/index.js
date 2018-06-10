@@ -12,11 +12,24 @@ module.exports = {
     assetsPublicPath: '/',
     //设置反向代理 在开发环境使用本地服务查询ajax的数据
     proxyTable: {
+      //获取推荐页面信息
       '/getRecommend': {
         target: 'https://c.y.qq.com/musichall/fcgi-bin/fcg_yqqhomepagerecommend.fcg',
         changeOrigin: true,//更改源使之可以跨域
         pathRewrite: {
           '^/getRecommend': ""//相当于一个正则，将url中key的部分替换成value
+        }
+      },
+      //获取歌手信息
+      '/getSinger': {
+        target: 'https://u.y.qq.com/cgi-bin/musicu.fcg',
+        changeOrigin: true,
+        bypass: function (req, res, proxyOptions) {
+          req.headers.referer = 'https://y.qq.com/portal/singer_list.html'
+          // req.headers.host = 'music.163.com'
+        },
+        pathRewrite: {
+          '^/getSinger': ""
         }
       }
     },
