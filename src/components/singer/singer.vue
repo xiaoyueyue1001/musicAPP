@@ -29,7 +29,7 @@ export default {
     //将借口返回的数据格式化为有序的数组(hot最前后面依次a到z)
     _formateSingerList(list) {
       let hot = {};
-      hot.title = "Hot";
+      hot.title = "热门";
       hot.items = list.slice(0, 10).map(item => {
         return new Singer(item.Fsinger_id, item.Fsinger_name, item.Fsinger_mid);
       });
