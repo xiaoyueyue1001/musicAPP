@@ -1,12 +1,14 @@
 <template>
     <div class="singer">
-      <list-view :data='songListData'></list-view>
+      <list-view :data='songListData' @itemClick="selectSinger"></list-view>
+      <router-view></router-view>
     </div>
 </template>
 <script>
 import { getSingerList } from "api/singer";
 import { Singer } from "common/js/commonClass";
 import ListView from "base/listview/listview";
+import { mapMutations } from "vuex";
 
 const HOTSINGERLEN = 10;
 export default {
@@ -19,6 +21,12 @@ export default {
     this._getSongList();
   },
   methods: {
+    selectSinger(singer) {
+      this.setSinger(singer);
+      this.$router.push({
+        path: `/singer/${singer.id}`
+      });
+    },
     _getSongList() {
       getSingerList().then(res => {
         if (res.code === 0) {
@@ -56,7 +64,10 @@ export default {
       });
 
       return [hot, ...azArray];
-    }
+    },
+    ...mapMutations({
+      setSinger: "SET_SINGER"
+    })
   },
   components: {
     ListView
