@@ -5,13 +5,41 @@
 </template>
 <script>
 import { mapGetters } from "vuex";
+import { getSingerInfo, getMusicVkey } from "api/singer";
+import { createSong } from "common/js/commonClass";
 
 export default {
   computed: {
     ...mapGetters(["singer"])
   },
   created() {
-    console.log(this.singer);
+    this._getSingerInfo();
+  },
+  methods: {
+    _getSingerInfo() {
+      if (!this.singer.mid) {
+        this.$router.push({
+          path: "/singer"
+        });
+      }
+      getSingerInfo(this.singer).then(res => {
+        if (res.code === 0) {
+          let ret = [];
+          this.songs = res.data.list.map(songInfo =>
+            createSong(songInfo.musicData)
+          );
+          console.log(this.songs);
+        }
+      });
+
+      getMusicVkey().then(res => {
+        let filename = res.data.items[0].filename;
+        let vkey = res.data.items[0].vkey;
+        console.log(
+          `http://dl.stream.qqmusic.qq.com/${filename}?vkey=${vkey}&guid=7833995540&uin=0&fromtag=66`
+        );
+      });
+    }
   }
 };
 </script>
