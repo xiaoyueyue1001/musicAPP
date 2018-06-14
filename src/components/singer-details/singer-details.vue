@@ -1,16 +1,24 @@
 <template>
     <transition name="slide">
-        <div class="singer-details">歌手详情页</div>
+        <music-list :title='singer.name' :avatar="singer.avatar" :songs="songs"></music-list>
     </transition>
 </template>
 <script>
 import { mapGetters } from "vuex";
 import { getSingerInfo, getMusicVkey } from "api/singer";
 import { createSong } from "common/js/commonClass";
+import MusicList from "components/music-list/music-list.vue";
 
 export default {
+  data() {
+    return {
+      songs: []
+    };
+  },
   computed: {
     ...mapGetters(["singer"])
+    // title: this.singer.name,
+    // avatar: this.singer.avatar
   },
   created() {
     this._getSingerInfo();
@@ -40,6 +48,9 @@ export default {
         );
       });
     }
+  },
+  components: {
+    MusicList
   }
 };
 </script>
@@ -47,21 +58,11 @@ export default {
 @import '~common/stylus/variable';
 
 .slide-enter-active, .slide-leave-active {
-    transition: all 0.3s;
+  transition: all 0.3s;
 }
 
 .slide-enter, .slide-leave-to {
-    transform: translate3d(100%, 0, 0);
-}
-
-.singer-details {
-    position: fixed;
-    z-index: 100;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: $color-background;
+  transform: translate3d(100%, 0, 0);
 }
 </style>
 
