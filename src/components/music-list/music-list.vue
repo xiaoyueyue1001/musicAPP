@@ -1,22 +1,40 @@
 <template>
     <div class="music-list">
         <div class="back">
-            <i class="icon-back"></i>
+            <i class="icon-back" @click='back'></i>
         </div>
         <div class="title">{{title}}</div>
         <div class="bg-image" :style="bgStyle" ref="bgImage">
+            <div class="play-wrapper">
+                <div ref="playBtn" v-show="playBtnShow" class="play">
+                    <i class="icon-play"></i>
+                    <span class="text">随机播放全部</span>
+                </div>
+            </div>
             <div class="filter"></div>
         </div>
-        <scroll class="list" :data="songs" ref='scroll'>
+        <div class="bg-layer" ref="layer"></div>   
+        <scroll class="list" 
+                :data="songs" 
+                ref='scroll'
+                :probe-type='probeType'
+                :listen-scroll='listenScroll'
+                @scroll="scroll">
             <div class="song-list-wrapper">
                 <song-list :songs="songs"></song-list>
             </div>
+            <div v-show="!songs.length" class="loading-container">
+        <loading></loading>
+      </div>
         </scroll>
     </div>
 </template>
 <script>
 import Scroll from "base/scroll/scroll";
 import SongList from "base/song-list/song-list";
+import Loading from "base/loading/loading";
+
+const HEADERHEIGHT = 40;
 export default {
   props: {
     title: {
@@ -34,17 +52,72 @@ export default {
       }
     }
   },
+  data() {
+    return {
+      scrollY: 0
+    };
+  },
+  created() {
+    this.probeType = 3;
+    this.listenScroll = true;
+  },
   computed: {
     bgStyle() {
       return `background-image:url(${this.avatar})`;
+    },
+    playBtnShow() {
+      return (
+        this.songs.length > 0 && this.scrollY > HEADERHEIGHT - this.bgImageHight
+      );
+    }
+  },
+  methods: {
+    scroll(pos) {
+      this.scrollY = pos.y;
+    },
+    back() {
+      this.$router.back();
     }
   },
   mounted() {
-    this.$refs.scroll.$el.style.top = `${this.$refs.bgImage.clientHeight}px`;
+    this.bgImageHight = this.$refs.bgImage.clientHeight;
+    this.$refs.scroll.$el.style.top = `${this.bgImageHight}px`;
+  },
+  watch: {
+    scrollY(newY) {
+      let translateY,
+        bgImagezIndex,
+        bgImagePaddingTop,
+        bgImageHeight,
+        bgImageScale;
+      //判断图片放大的倍数
+      if (newY > 0) {
+        bgImageScale = newY / this.bgImageHight + 1;
+        bgImagezIndex = 10;
+      } else if (-newY < this.bgImageHight - HEADERHEIGHT) {
+        //向上滑动不到顶部底部的时候
+        translateY = newY;
+        bgImagezIndex = 0;
+        bgImagePaddingTop = "70%";
+        bgImageHeight = 0;
+      } else {
+        //向上滑动超过顶部底部的时候
+        translateY = HEADERHEIGHT - this.bgImageHight;
+        bgImagezIndex = 10;
+        bgImagePaddingTop = 0;
+        bgImageHeight = HEADERHEIGHT;
+      }
+      this.$refs.layer.style.transform = `translate3d(0,${translateY}px,0)`;
+      this.$refs.bgImage.style.zIndex = bgImagezIndex;
+      this.$refs.bgImage.style.paddingTop = bgImagePaddingTop;
+      this.$refs.bgImage.style.height = `${bgImageHeight}px`;
+      this.$refs.bgImage.style.transform = `scale(${bgImageScale})`;
+    }
   },
   components: {
     Scroll,
-    SongList
+    SongList,
+    Loading
   }
 };
 </script>
@@ -150,7 +223,6 @@ export default {
         bottom: 0;
         width: 100%;
         background: $color-background;
-        overflow: hidden;
 
         .song-list-wrapper {
             padding: 20px 30px;

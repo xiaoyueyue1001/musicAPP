@@ -49,8 +49,10 @@ export default {
       this.scroll && this.scroll.refresh();
     },
     _scrollToElement() {
-      debugger;
       this.scroll && this.scroll.scrollToElement.apply(this.scroll, arguments);
+    },
+    _scrollTo() {
+      this.scroll && this.scroll.scrollTo.apply(this.scroll, arguments);
     }
   },
   watch: {
