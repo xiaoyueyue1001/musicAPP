@@ -1,3 +1,11 @@
+import { playMode } from 'common/js/config'
+
 export default {
-    singer: {}
+    singer: {},
+    playing: false,
+    fullScreen: false,
+    playList: [],
+    sequenceList: [],
+    playMode: playMode.sequence,
+    currentIndex: -1
 }
