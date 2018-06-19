@@ -36,17 +36,17 @@ export default {
           this.songs = res.data.list.map(songInfo =>
             createSong(songInfo.musicData)
           );
-          console.log(this.songs);
+          // console.log(this.songs);
         }
       });
 
-      getMusicVkey().then(res => {
-        let filename = res.data.items[0].filename;
-        let vkey = res.data.items[0].vkey;
-        console.log(
-          `http://dl.stream.qqmusic.qq.com/${filename}?vkey=${vkey}&guid=7833995540&uin=0&fromtag=66`
-        );
-      });
+      // getMusicVkey().then(res => {
+      //   let filename = res.data.items[0].filename;
+      //   let vkey = res.data.items[0].vkey;
+      //   console.log(
+      //     `http://dl.stream.qqmusic.qq.com/${filename}?vkey=${vkey}&guid=7833995540&uin=0&fromtag=66`
+      //   );
+      // });
     }
   },
   components: {

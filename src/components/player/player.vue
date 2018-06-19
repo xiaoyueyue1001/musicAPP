@@ -19,7 +19,7 @@
                 <div class="middle">
                     <div class="middle-l">
                         <div class="cd-wrapper" ref="cdWrapper">
-                            <div class="cd">
+                            <div class="cd" :class="cdClass">
                                 <img class="image" :src="currentSong.image">
                             </div>
                         </div>
@@ -34,7 +34,7 @@
                             <i class="icon-prev"></i>
                         </div>
                         <div class="icon i-center">
-                            <i class="icon-play"></i>
+                            <i :class="playIcon" @click="togglePlay"></i>
                         </div>
                         <div class="icon i-right">
                             <i class="icon-next"></i>
@@ -48,28 +48,41 @@
         </transition>
         <transition name="mini">
             <div class="mini-player" v-show="!fullScreen" @click="up">
-            <div class="icon">
-                <img  width="40" height="40" :src="currentSong.image">
+                <div class="icon">
+                    <img  :class="cdClass" width="40" height="40" :src="currentSong.image">
+                </div>
+                <div class="text">
+                    <div class="name" v-html="currentSong.name"></div>
+                    <div class="desc" v-html="currentSong.singer"></div>
+                </div>
+                <div class="control">
+                    <i :class="minIcon" @click.stop="togglePlay"></i>
+                </div>
+                <div class="control">
+                    <i class="icon-playlist"></i>
+                </div>
             </div>
-            <div class="text">
-                <div class="name" v-html="currentSong.name"></div>
-                <div class="desc" v-html="currentSong.singer"></div>
-            </div>
-            <div class="control"></div>
-            <div class="control">
-                <i class="icon-playlist"></i>
-            </div>
-        </div>
-        </transition>       
+        </transition> 
+        <audio  ref="audio"></audio>      
     </div>
 </template>
 <script>
 import { mapGetters, mapMutations } from "vuex";
 import animations from "create-keyframe-animation";
+import { getMusicVkey } from "api/singer";
 
 export default {
   computed: {
-    ...mapGetters(["playList", "fullScreen", "currentSong"])
+    playIcon() {
+      return this.playing ? "icon-pause" : "icon-play";
+    },
+    minIcon() {
+      return this.playing ? "icon-pause-mini" : "icon-play-mini";
+    },
+    cdClass() {
+      return this.playing ? "play" : "play pause";
+    },
+    ...mapGetters(["playList", "fullScreen", "currentSong", "playing"])
   },
   methods: {
     back() {
@@ -115,6 +128,24 @@ export default {
       this.$refs.cdWrapper.style.transition = "";
       this.$refs.cdWrapper.style.transform = "";
     },
+    getSongSrc(callback) {
+      let vkeyPromise = getMusicVkey(this.currentSong.url);
+      vkeyPromise.then(res => {
+        if (res.code === 0) {
+          let src = `http://dl.stream.qqmusic.qq.com/${
+            res.data.items[0].filename
+          }?vkey=${res.data.items[0].vkey}&guid=7833995540&uin=0&fromtag=66`;
+          this.$refs.audio.src = src;
+          callback();
+        }
+      });
+    },
+    togglePlay() {
+      this.setPlayingstate(!this.playing);
+
+      let audio = this.$refs.audio;
+      this.playing ? audio.play() : audio.pause();
+    },
     _getPosAndScale() {
       const targetWidth = 40;
       const paddingLeft = 40;
@@ -131,8 +162,23 @@ export default {
       };
     },
     ...mapMutations({
-      setFullscreen: "SET_FULLSCREEN"
+      setFullscreen: "SET_FULLSCREEN",
+      setPlayingstate: "SET_PLAYING"
     })
+  },
+  watch: {
+    currentSong() {
+      this.getSongSrc(() => {
+        this.$nextTick(() => {
+          console.log(this.$refs.audio.src);
+          this.$refs.audio.play();
+        });
+      });
+    }
+    // playing(newPlayingState) {
+    //   let audio = this.$refs.audio;
+    //   newPlayingState ? audio.play() : audio.pause();
+    // }
   }
 };
 </script>
