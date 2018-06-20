@@ -30,14 +30,14 @@
                         <div class="icon i-left">
                             <i class="icon-sequence"></i>
                         </div>
-                        <div class="icon i-left">
-                            <i class="icon-prev"></i>
+                        <div class="icon i-left" :class="btnDisable">
+                            <i class="icon-prev" @click="prev"></i>
                         </div>
-                        <div class="icon i-center">
-                            <i :class="playIcon" @click="togglePlay('normalCd')"></i>
+                        <div class="icon i-center" :class="btnDisable">
+                            <i :class="playIcon" @click="togglePlay('normalCd')" ref="normalPlay"></i>
                         </div>
-                        <div class="icon i-right">
-                            <i class="icon-next"></i>
+                        <div class="icon i-right" :class="btnDisable">
+                            <i class="icon-next" @click="next"></i>
                         </div>
                         <div class="icon i-right">
                             <i class="icon-not-favorite"></i>
@@ -63,7 +63,7 @@
                 </div>
             </div>
         </transition> 
-        <audio  ref="audio"></audio>      
+        <audio  ref="audio" @canplay="ready" @error="error"></audio>      
     </div>
 </template>
 <script>
@@ -72,6 +72,11 @@ import animations from "create-keyframe-animation";
 import { getMusicVkey } from "api/singer";
 
 export default {
+  data() {
+    return {
+      songRead: false
+    };
+  },
   computed: {
     playIcon() {
       return this.playing ? "icon-pause" : "icon-play";
@@ -82,7 +87,16 @@ export default {
     cdClass() {
       return this.playing ? "play" : "";
     },
-    ...mapGetters(["playList", "fullScreen", "currentSong", "playing"])
+    btnDisable() {
+      return this.songRead ? "" : "disable";
+    },
+    ...mapGetters([
+      "playList",
+      "fullScreen",
+      "currentSong",
+      "playing",
+      "currentIndex"
+    ])
   },
   methods: {
     back() {
@@ -158,6 +172,36 @@ export default {
             : cTransform.concat(" ", iTransform);
       }
     },
+    prev() {
+      if (!this.songRead) {
+        return;
+      }
+      let index = this.currentIndex - 1;
+      if (index === -1) {
+        index = this.playList.length - 1;
+      }
+      this.setCurrentIndex(index);
+      this.setPlayingstate(false);
+      //   this.togglePlay();
+    },
+    next() {
+      if (!this.songRead) {
+        return;
+      }
+      let index = this.currentIndex + 1;
+      if (index === this.playList.length) {
+        index = 0;
+      }
+      this.setCurrentIndex(index);
+      this.setPlayingstate(false);
+      //   this.togglePlay();
+    },
+    ready() {
+      this.songRead = true;
+    },
+    error() {
+      this.songRead = true;
+    },
     _getPosAndScale() {
       const targetWidth = 40;
       const paddingLeft = 40;
@@ -175,15 +219,18 @@ export default {
     },
     ...mapMutations({
       setFullscreen: "SET_FULLSCREEN",
-      setPlayingstate: "SET_PLAYING"
+      setPlayingstate: "SET_PLAYING",
+      setCurrentIndex: "SET_CURRENINDEX"
     })
   },
   watch: {
     currentSong() {
+      this.songRead = false;
       this.getSongSrc(() => {
         this.$nextTick(() => {
           //   console.log(this.$refs.audio.src);
           //   this.$refs.audio.play();
+          this.$refs.normalPlay.click();
         });
       });
     }
@@ -290,9 +337,9 @@ export default {
                         // animation-play-state: paused;
                         // }
                         .image {
-                            position: absolute;
-                            left: 0;
-                            top: 0;
+                            // position: absolute;
+                            // left: 0;
+                            // top: 0;
                             width: 100%;
                             height: 100%;
                             border-radius: 50%;
@@ -482,9 +529,12 @@ export default {
         .icon {
             flex: 0 0 40px;
             width: 40px;
-            padding: 0 10px 0 20px;
+            margin: 0 20px 0 20px;
+            border-radius: 50%;
 
             img {
+                width: 100%;
+                height: 100%;
                 border-radius: 50%;
 
                 &.play {
