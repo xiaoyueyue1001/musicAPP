@@ -58,9 +58,7 @@ export default {
     }
   },
   created() {
-    setTimeout(() => {
-      this._getRecommend();
-    }, 1000);
+    this._getRecommend();
   },
   methods: {
     _getRecommend() {

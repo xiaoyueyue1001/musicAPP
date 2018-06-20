@@ -88,6 +88,9 @@ export default {
       });
 
       this.slider.on("scrollEnd", () => {
+        if (this.timer) {
+          clearTimeout(this.timer);
+        }
         let currentPage = this.slider.getCurrentPage().pageX;
         this.currentPage = currentPage;
         //每次切面切换玩进行下一次切换的计时

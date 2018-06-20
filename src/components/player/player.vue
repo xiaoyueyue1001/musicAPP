@@ -19,8 +19,8 @@
                 <div class="middle">
                     <div class="middle-l">
                         <div class="cd-wrapper" ref="cdWrapper">
-                            <div class="cd" :class="cdClass">
-                                <img class="image" :src="currentSong.image">
+                            <div class="cd" >
+                                <img class="image" :src="currentSong.image" :class="cdClass" ref="normalCd">
                             </div>
                         </div>
                     </div>
@@ -34,7 +34,7 @@
                             <i class="icon-prev"></i>
                         </div>
                         <div class="icon i-center">
-                            <i :class="playIcon" @click="togglePlay"></i>
+                            <i :class="playIcon" @click="togglePlay('normalCd')"></i>
                         </div>
                         <div class="icon i-right">
                             <i class="icon-next"></i>
@@ -49,14 +49,14 @@
         <transition name="mini">
             <div class="mini-player" v-show="!fullScreen" @click="up">
                 <div class="icon">
-                    <img  :class="cdClass" width="40" height="40" :src="currentSong.image">
+                    <img  :class="cdClass" width="40" height="40" :src="currentSong.image" ref="miniCD">
                 </div>
                 <div class="text">
                     <div class="name" v-html="currentSong.name"></div>
                     <div class="desc" v-html="currentSong.singer"></div>
                 </div>
                 <div class="control">
-                    <i :class="minIcon" @click.stop="togglePlay"></i>
+                    <i :class="minIcon" @click.stop="togglePlay('miniCD')"></i>
                 </div>
                 <div class="control">
                     <i class="icon-playlist"></i>
@@ -80,7 +80,7 @@ export default {
       return this.playing ? "icon-pause-mini" : "icon-play-mini";
     },
     cdClass() {
-      return this.playing ? "play" : "play pause";
+      return this.playing ? "play" : "";
     },
     ...mapGetters(["playList", "fullScreen", "currentSong", "playing"])
   },
@@ -140,11 +140,23 @@ export default {
         }
       });
     },
-    togglePlay() {
+    togglePlay(cdName) {
       this.setPlayingstate(!this.playing);
 
       let audio = this.$refs.audio;
-      this.playing ? audio.play() : audio.pause();
+      if (this.playing) {
+        audio.play();
+      } else {
+        audio.pause();
+        let imageDome = this.$refs[cdName];
+        let containerDom = this.$refs[cdName].parentNode;
+        let iTransform = getComputedStyle(imageDome).transform;
+        let cTransform = getComputedStyle(containerDom).transform;
+        containerDom.style.transform =
+          cTransform === "none"
+            ? iTransform
+            : cTransform.concat(" ", iTransform);
+      }
     },
     _getPosAndScale() {
       const targetWidth = 40;
@@ -170,8 +182,8 @@ export default {
     currentSong() {
       this.getSongSrc(() => {
         this.$nextTick(() => {
-          console.log(this.$refs.audio.src);
-          this.$refs.audio.play();
+          //   console.log(this.$refs.audio.src);
+          //   this.$refs.audio.play();
         });
       });
     }
@@ -274,14 +286,9 @@ export default {
                         border: 10px solid rgba(255, 255, 255, 0.1);
                         border-radius: 50%;
 
-                        &.play {
-                            animation: rotate 20s linear infinite;
-                        }
-
-                        &.pause {
-                            animation-play-state: paused;
-                        }
-
+                        // &.pause {
+                        // animation-play-state: paused;
+                        // }
                         .image {
                             position: absolute;
                             left: 0;
@@ -289,6 +296,10 @@ export default {
                             width: 100%;
                             height: 100%;
                             border-radius: 50%;
+
+                            &.play {
+                                animation: rotate 20s linear infinite;
+                            }
                         }
                     }
                 }
@@ -478,10 +489,6 @@ export default {
 
                 &.play {
                     animation: rotate 10s linear infinite;
-                }
-
-                &.pause {
-                    animation-play-state: paused;
                 }
             }
         }
