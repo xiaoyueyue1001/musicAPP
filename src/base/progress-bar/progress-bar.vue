@@ -3,9 +3,9 @@
         <div class="bar-inner">
             <div class="progress" ref="progress"></div>
             <div class="progress-btn-wrapper" 
-            @touchstart="progressBarTouchstart"
-            @touchmove="progressBarTouchmove"
-            @touchend="progressBarTouchend"
+            @touchstart.prevent="progressBarTouchstart"
+            @touchmove.prevent="progressBarTouchmove"
+            @touchend.prevent="progressBarTouchend"
             ref="progressBtn">
                 <div class="progress-btn"></div>
             </div>
@@ -39,16 +39,17 @@ export default {
         this.$refs.progressBar.clientWidth;
       let percent = this.percent + this.touch.deltaPercent;
       this._changePercent(percent);
+      this.$emit("changePercentIng", percent);
     },
     progressBarTouchend(e) {
       this.touch.initFlag = false;
       let percent = this.percent + this.touch.deltaPercent;
-      this.$emit("changePercent", percent);
+      this.$emit("changePercentEnd", percent);
     },
     progreeBarClick(e) {
       let percent = e.offsetX / this.$refs.progressBar.clientWidth;
       this._changePercent(percent);
-      this.$emit("changePercent", percent);
+      this.$emit("changePercentEnd", percent);
     },
     _changePercent(percent) {
       percent = percent < 0 ? 0 : percent;

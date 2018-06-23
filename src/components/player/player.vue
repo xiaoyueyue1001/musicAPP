@@ -27,10 +27,11 @@
                 </div>
                 <div class="bottom">
                     <div class="progress-wrapper">
-                        <span class="time time-l">{{timeFormat(currentTime)}}</span>
+                        <span class="time time-l">{{timeFormat(isDrag?dragTime:currentTime)}}</span>
                         <div class="progress-bar-wrapper">
                             <progress-bar :percent="percent"
-                                          @changePercent="changePercent">
+                                          @changePercentEnd="changePercentEnd"
+                                          @changePercentIng="changePercentIng">
                             </progress-bar>
                         </div>
                         <span class="time time-l">{{timeFormat(currentSong.duration)}}</span>
@@ -85,7 +86,8 @@ export default {
   data() {
     return {
       songReady: false,
-      currentTime: 0
+      currentTime: 0,
+      isDrag: false
     };
   },
   computed: {
@@ -228,8 +230,14 @@ export default {
       sec = sec < 10 ? "0" + sec : sec;
       return min + ":" + sec;
     },
-    changePercent(percent) {
+    changePercentEnd(percent) {
+      this.isDrag = false;
       this.$refs.audio.currentTime = this.currentSong.duration * percent;
+    },
+    changePercentIng(percent) {
+      this.isDrag = true;
+      this.dragTime = percent * this.currentSong.duration;
+      console.log(percent);
     },
     _getPosAndScale() {
       const targetWidth = 40;
