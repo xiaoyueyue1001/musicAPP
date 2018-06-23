@@ -20,12 +20,21 @@
                     <div class="middle-l">
                         <div class="cd-wrapper" ref="cdWrapper">
                             <div class="cd" >
-                                <img class="image" :src="currentSong.image" :class="cdClass" ref="normalCd">
+                                <img class="image" :src="currentSong.image"  ref="normalCd">
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="bottom">
+                    <div class="progress-wrapper">
+                        <span class="time time-l">{{timeFormat(currentTime)}}</span>
+                        <div class="progress-bar-wrapper">
+                            <progress-bar :percent="percent"
+                                          @changePercent="changePercent">
+                            </progress-bar>
+                        </div>
+                        <span class="time time-l">{{timeFormat(currentSong.duration)}}</span>
+                    </div>
                     <div class="operators">
                         <div class="icon i-left">
                             <i class="icon-sequence"></i>
@@ -49,7 +58,7 @@
         <transition name="mini">
             <div class="mini-player" v-show="!fullScreen" @click="up">
                 <div class="icon">
-                    <img  :class="cdClass" width="40" height="40" :src="currentSong.image" ref="miniCD">
+                    <img   width="40" height="40" :src="currentSong.image" ref="miniCD">
                 </div>
                 <div class="text">
                     <div class="name" v-html="currentSong.name"></div>
@@ -63,18 +72,20 @@
                 </div>
             </div>
         </transition> 
-        <audio  ref="audio" @canplay="ready" @error="error"></audio>      
+        <audio  ref="audio" @canplay="ready" @error="error" @timeupdate="timeupdate"></audio>      
     </div>
 </template>
 <script>
 import { mapGetters, mapMutations } from "vuex";
 import animations from "create-keyframe-animation";
 import { getMusicVkey } from "api/singer";
+import ProgressBar from "base/progress-bar/progress-bar";
 
 export default {
   data() {
     return {
-      songRead: false
+      songReady: false,
+      currentTime: 0
     };
   },
   computed: {
@@ -84,11 +95,14 @@ export default {
     minIcon() {
       return this.playing ? "icon-pause-mini" : "icon-play-mini";
     },
-    cdClass() {
-      return this.playing ? "play" : "";
-    },
+    // cdClass() {
+    //   return this.playing ? "play" : "";
+    // },
     btnDisable() {
-      return this.songRead ? "" : "disable";
+      return !this.songReady && this.playing ? "disable" : "";
+    },
+    percent() {
+      return this.currentTime / this.currentSong.duration;
     },
     ...mapGetters([
       "playList",
@@ -159,6 +173,7 @@ export default {
 
       let audio = this.$refs.audio;
       if (this.playing) {
+        this.$refs[cdName].classList.add("play");
         audio.play();
       } else {
         audio.pause();
@@ -170,37 +185,51 @@ export default {
           cTransform === "none"
             ? iTransform
             : cTransform.concat(" ", iTransform);
+        this.$refs[cdName].classList.remove("play");
       }
     },
     prev() {
-      if (!this.songRead) {
+      if (!this.songReady && this.playing) {
         return;
       }
       let index = this.currentIndex - 1;
       if (index === -1) {
         index = this.playList.length - 1;
       }
-      this.setCurrentIndex(index);
       this.setPlayingstate(false);
+      this.setCurrentIndex(index);
       //   this.togglePlay();
     },
     next() {
-      if (!this.songRead) {
+      if (!this.songReady && this.playing) {
         return;
       }
       let index = this.currentIndex + 1;
       if (index === this.playList.length) {
         index = 0;
       }
-      this.setCurrentIndex(index);
       this.setPlayingstate(false);
+      this.setCurrentIndex(index);
       //   this.togglePlay();
     },
     ready() {
-      this.songRead = true;
+      this.songReady = true;
     },
     error() {
-      this.songRead = true;
+      this.songReady = true;
+    },
+    timeupdate(e) {
+      this.currentTime = e.target.currentTime;
+    },
+    timeFormat(time) {
+      time = time | 0;
+      let min = (time / 60) | 0;
+      let sec = time % 60;
+      sec = sec < 10 ? "0" + sec : sec;
+      return min + ":" + sec;
+    },
+    changePercent(percent) {
+      this.$refs.audio.currentTime = this.currentSong.duration * percent;
     },
     _getPosAndScale() {
       const targetWidth = 40;
@@ -225,12 +254,18 @@ export default {
   },
   watch: {
     currentSong() {
-      this.songRead = false;
+      this.songReady = false;
       this.getSongSrc(() => {
         this.$nextTick(() => {
           //   console.log(this.$refs.audio.src);
           //   this.$refs.audio.play();
           this.$refs.normalPlay.click();
+          //   let event = new MouseEvent("click", {
+          //     view: window,
+          //     bubbles: true,
+          //     cancelable: true
+          //   });
+          //   this.$refs.normalPlay.dispatchEvent(event);
         });
       });
     }
@@ -238,6 +273,9 @@ export default {
     //   let audio = this.$refs.audio;
     //   newPlayingState ? audio.play() : audio.pause();
     // }
+  },
+  components: {
+    ProgressBar
   }
 };
 </script>
@@ -430,7 +468,7 @@ export default {
                     font-size: $font-size-small;
                     flex: 0 0 30px;
                     line-height: 30px;
-                    width: 30px;
+                    width: 40px;
 
                     &.time-l {
                         text-align: left;
@@ -443,6 +481,7 @@ export default {
 
                 .progress-bar-wrapper {
                     flex: 1;
+                    margin: 0 10px;
                 }
             }
 
