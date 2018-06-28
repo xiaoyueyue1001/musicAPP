@@ -48,7 +48,7 @@ export function getSingerInfo({ mid }) {
     })
 }
 
-export function getMusicVkey(songmid = "002ejEdb4KTwBw") {
+export function getMusicVkey(songmid) {
     // const url = '/getMusicVkey';
     const url = 'https://c.y.qq.com/base/fcgi-bin/fcg_music_express_mobile3.fcg';
     const data = {
@@ -69,17 +69,29 @@ export function getMusicVkey(songmid = "002ejEdb4KTwBw") {
         filename: `C400${songmid}.m4a`,
         guid: 7833995540,
     }
-    // return new Promise((resolve, reject) => {
-    //     axios({
-    //         method: 'get',
-    //         url: url,
-    //         data: data
-    //     }).then(res => {
-    //         resolve(res.data);
-    //     }).catch(err => {
-    //         reject(err);
-    //     })
-    // })
+    return jsonp(url, data, {
+        // param: 'jsonpCallback'
+    })
+}
+
+export function getLyric(songmid = "003399lJ0At8Zu") {
+    // const url = "https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg";
+    const url = "/getLyric";
+    const data = {
+        // callback: 'MusicJsonCallback_lrc',
+        pcachetime: 1529935554445,
+        songmid: songmid,
+        g_tk: 5381,
+        // jsonpCallback: 'MusicJsonCallback_lrc',
+        loginUin: 0,
+        hostUin: 0,
+        format: 'jsonp',
+        inCharset: 'utf8',
+        outCharset: 'utf-8',
+        notice: 0,
+        platform: 'yqq',
+        needNewCode: 0,
+    }
     return jsonp(url, data, {
         // param: 'jsonpCallback'
     })

@@ -42,6 +42,17 @@ module.exports = {
         pathRewrite: {
           '^/getMusicVkey': ""
         }
+      },
+      '/getLyric': {
+        target: 'https://c.y.qq.com/lyric/fcgi-bin/fcg_query_lyric_new.fcg',
+        changeOrigin: true,
+        bypass: function (req, res, proxyOptions) {
+          req.headers.referer = 'https://y.qq.com/portal/player.html'
+          req.headers.host = 'c.y.qq.com'
+        },
+        pathRewrite: {
+          '^/getLyric': ""
+        }
       }
     },
 

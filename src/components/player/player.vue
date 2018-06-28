@@ -16,16 +16,36 @@
                     <h1 class="title" v-html="currentSong.name"></h1>
                     <h2 class="subtitle" v-html="currentSong.singer"></h2>
                 </div>
-                <div class="middle">
-                    <div class="middle-l">
+                <div class="middle"
+                    @touchstart.prevent="middleTouchstart"
+                    @touchmove.prevent="middleTouchmove"
+                    @touchend.prevent="middleTouchend">
+                    <div class="middle-l" ref="middleL">
                         <div class="cd-wrapper" ref="cdWrapper">
                             <div class="cd" >
                                 <img class="image" :src="currentSong.image"  ref="normalCd">
                             </div>
                         </div>
                     </div>
+                    <scroll class="middle-r" :data="lyric&&lyric.lines" ref="lyricScroll">
+                        <div class="lyric-wrapper">
+                            <div v-if="lyric">
+                                <p 
+                                class="text" 
+                                ref="lines"
+                                :class="{current:currentLyricLineNum===index}"
+                                v-for="(line,index) in lyric.lines" 
+                                :key="index"
+                                >{{line.txt}}</p>
+                            </div>
+                        </div>
+                    </scroll>
                 </div>
                 <div class="bottom">
+                    <div class="dot-wrapper">
+                        <span class="dot" :class="{'active':currentShow==='cd'}"></span>
+                        <span class="dot" :class="{'active':currentShow==='lyric'}"></span>
+                    </div>
                     <div class="progress-wrapper">
                         <span class="time time-l">{{timeFormat(isDrag?dragTime:currentTime)}}</span>
                         <div class="progress-bar-wrapper">
@@ -79,15 +99,20 @@
 <script>
 import { mapGetters, mapMutations } from "vuex";
 import animations from "create-keyframe-animation";
-import { getMusicVkey } from "api/singer";
+import { getMusicVkey, getLyric } from "api/singer";
 import ProgressBar from "base/progress-bar/progress-bar";
-
+import { Base64 } from "js-base64";
+import Lyric from "lyric-parser";
+import Scroll from "base/scroll/scroll";
 export default {
   data() {
     return {
       songReady: false,
       currentTime: 0,
-      isDrag: false
+      isDrag: false,
+      lyric: null,
+      currentLyricLineNum: 0,
+      currentShow: "cd"
     };
   },
   computed: {
@@ -113,6 +138,9 @@ export default {
       "playing",
       "currentIndex"
     ])
+  },
+  created() {
+    this.touch = {};
   },
   methods: {
     back() {
@@ -237,7 +265,65 @@ export default {
     changePercentIng(percent) {
       this.isDrag = true;
       this.dragTime = percent * this.currentSong.duration;
-      console.log(percent);
+    },
+    middleTouchstart(e) {
+      this.touch.isStart = true;
+      this.touch.startX = e.touches[0].pageX;
+      this.touch.startY = e.touches[0].pageY;
+      this.$refs.lyricScroll.$el.style.transition = "";
+      this.$refs.middleL.style.transition = "";
+    },
+    middleTouchmove(e) {
+      if (!this.touch.isStart) {
+        return;
+      }
+      let deltaX = e.touches[0].pageX - this.touch.startX;
+      let deltaY = e.touches[0].pageY - this.touch.startY;
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        if (this.currentShow === "cd" && deltaX < 0) {
+          this.touch.percent = -deltaX / window.innerWidth;
+          this.$refs.lyricScroll.$el.style.transform = `translate3d(${deltaX}px,0,0)`;
+          this.$refs.middleL.style.opacity = 1 - this.touch.percent;
+        } else if (this.currentShow === "lyric" && deltaX > 0) {
+          this.touch.percent = deltaX / window.innerWidth;
+          this.$refs.lyricScroll.$el.style.transform = `translate3d(${deltaX -
+            window.innerWidth}px,0,0)`;
+          this.$refs.middleL.style.opacity = this.touch.percent;
+        } else {
+          //移动无效
+          this.touch.percent = -1;
+        }
+      }
+    },
+    middleTouchend(e) {
+      if (this.touch.percent < 0) {
+        return;
+      }
+      let offsetX = 0;
+      let opacity = 0;
+      if (this.touch.percent > 0.1) {
+        if (this.currentShow === "lyric") {
+          offsetX = 0;
+          opacity = 1;
+          this.currentShow = "cd";
+        } else {
+          offsetX = -window.innerWidth;
+          opacity = 0;
+          this.currentShow = "lyric";
+        }
+      } else {
+        if (this.currentShow === "lyric") {
+          offsetX = -window.innerWidth;
+          opacity = 0;
+        } else {
+          offsetX = 0;
+          opacity = 1;
+        }
+      }
+      this.$refs.lyricScroll.$el.style.transition = "all 0.3s";
+      this.$refs.lyricScroll.$el.style.transform = `translate3d(${offsetX}px,0,0)`;
+      this.$refs.middleL.style.transition = "all 0.3s";
+      this.$refs.middleL.style.opacity = opacity;
     },
     _getPosAndScale() {
       const targetWidth = 40;
@@ -254,6 +340,17 @@ export default {
         scale
       };
     },
+    _lyricCallback({ lineNum, txt }) {
+      this.currentLyricLineNum = lineNum;
+      if (lineNum < 5) {
+        this.$refs.lyricScroll._scrollTo(0, 0, 1000);
+      } else {
+        this.$refs.lyricScroll._scrollToElement(
+          this.$refs.lines[lineNum - 5],
+          1000
+        );
+      }
+    },
     ...mapMutations({
       setFullscreen: "SET_FULLSCREEN",
       setPlayingstate: "SET_PLAYING",
@@ -261,29 +358,26 @@ export default {
     })
   },
   watch: {
-    currentSong() {
+    currentSong(newSong) {
       this.songReady = false;
       this.getSongSrc(() => {
         this.$nextTick(() => {
-          //   console.log(this.$refs.audio.src);
-          //   this.$refs.audio.play();
           this.$refs.normalPlay.click();
-          //   let event = new MouseEvent("click", {
-          //     view: window,
-          //     bubbles: true,
-          //     cancelable: true
-          //   });
-          //   this.$refs.normalPlay.dispatchEvent(event);
         });
       });
+      getLyric(newSong.mid).then(res => {
+        let lyric = Base64.decode(res.lyric);
+        this.lyric = new Lyric(lyric, this._lyricCallback);
+        console.log(this.lyric);
+        if (this.playing) {
+          this.lyric.play();
+        }
+      });
     }
-    // playing(newPlayingState) {
-    //   let audio = this.$refs.audio;
-    //   newPlayingState ? audio.play() : audio.pause();
-    // }
   },
   components: {
-    ProgressBar
+    ProgressBar,
+    Scroll
   }
 };
 </script>
