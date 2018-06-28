@@ -64,7 +64,7 @@
                             <i class="icon-prev" @click="prev"></i>
                         </div>
                         <div class="icon i-center" :class="btnDisable">
-                            <i :class="playIcon" @click="togglePlay('normalCd')" ref="normalPlay"></i>
+                            <i :class="playIcon" @click="togglePlay()" ref="normalPlay"></i>
                         </div>
                         <div class="icon i-right" :class="btnDisable">
                             <i class="icon-next" @click="next"></i>
@@ -79,14 +79,16 @@
         <transition name="mini">
             <div class="mini-player" v-show="!fullScreen" @click="up">
                 <div class="icon">
-                    <img   width="40" height="40" :src="currentSong.image" ref="miniCD">
+                    <img width="40" height="40" :src="currentSong.image" ref="miniCD">
                 </div>
                 <div class="text">
                     <div class="name" v-html="currentSong.name"></div>
                     <div class="desc" v-html="currentSong.singer"></div>
                 </div>
                 <div class="control">
-                    <i :class="minIcon" @click.stop="togglePlay('miniCD')"></i>
+                    <progress-circle :radius="miniRadius" :percent="percent">
+                        <i :class="minIcon" class="icon-mini"  @click.stop="togglePlay()"></i>
+                    </progress-circle>
                 </div>
                 <div class="control">
                     <i class="icon-playlist"></i>
@@ -104,6 +106,7 @@ import ProgressBar from "base/progress-bar/progress-bar";
 import { Base64 } from "js-base64";
 import Lyric from "lyric-parser";
 import Scroll from "base/scroll/scroll";
+import ProgressCircle from "base/progress-circle/progress-circle"
 export default {
   data() {
     return {
@@ -112,7 +115,8 @@ export default {
       isDrag: false,
       lyric: null,
       currentLyricLineNum: 0,
-      currentShow: "cd"
+      currentShow: "cd",
+      miniRadius:32
     };
   },
   computed: {
@@ -198,24 +202,36 @@ export default {
         }
       });
     },
-    togglePlay(cdName) {
+    togglePlay(cdName) { //normalCd miniCD
       this.setPlayingstate(!this.playing);
 
       let audio = this.$refs.audio;
       if (this.playing) {
-        this.$refs[cdName].classList.add("play");
+        this.$refs["normalCd"].classList.add("play");
+        this.$refs["miniCD"].classList.add("play");
         audio.play();
       } else {
         audio.pause();
-        let imageDome = this.$refs[cdName];
-        let containerDom = this.$refs[cdName].parentNode;
+        //大CD旋转
+        let imageDome = this.$refs["normalCd"];
+        let containerDom = this.$refs["normalCd"].parentNode;
         let iTransform = getComputedStyle(imageDome).transform;
         let cTransform = getComputedStyle(containerDom).transform;
         containerDom.style.transform =
           cTransform === "none"
             ? iTransform
             : cTransform.concat(" ", iTransform);
-        this.$refs[cdName].classList.remove("play");
+        this.$refs["normalCd"].classList.remove("play");
+        //miniCD旋转
+        let imageDome1 = this.$refs["miniCD"];
+        let containerDom1 = this.$refs["miniCD"].parentNode;
+        let iTransform1 = getComputedStyle(imageDome1).transform;
+        let cTransform1 = getComputedStyle(containerDom1).transform;
+        containerDom1.style.transform =
+          cTransform1 === "none"
+            ? iTransform1
+            : cTransform1.concat(" ", iTransform1);
+        this.$refs["miniCD"].classList.remove("play");
       }
     },
     prev() {
@@ -360,6 +376,7 @@ export default {
   watch: {
     currentSong(newSong) {
       this.songReady = false;
+      this.schedule = 0;
       this.getSongSrc(() => {
         this.$nextTick(() => {
           this.$refs.normalPlay.click();
@@ -368,7 +385,6 @@ export default {
       getLyric(newSong.mid).then(res => {
         let lyric = Base64.decode(res.lyric);
         this.lyric = new Lyric(lyric, this._lyricCallback);
-        console.log(this.lyric);
         if (this.playing) {
           this.lyric.play();
         }
@@ -377,7 +393,8 @@ export default {
   },
   components: {
     ProgressBar,
-    Scroll
+    Scroll,
+    ProgressCircle
   }
 };
 </script>
