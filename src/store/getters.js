@@ -4,7 +4,7 @@ export default {
     fullScreen: state => state.fullScreen,
     playList: state => state.playList,
     sequenceList: state => state.sequenceList,
-    mode: state => state.mode,
+    mode: state => state.playMode,
     currentIndex: state => state.currentIndex,
     currentSong: state => state.playList[state.currentIndex] || {}
 }

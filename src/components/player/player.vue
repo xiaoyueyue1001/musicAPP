@@ -58,7 +58,7 @@
                     </div>
                     <div class="operators">
                         <div class="icon i-left">
-                            <i class="icon-sequence"></i>
+                            <i :class="playmodeIcon" @click="changePlayMode"></i>
                         </div>
                         <div class="icon i-left" :class="btnDisable">
                             <i class="icon-prev" @click="prev"></i>
@@ -95,7 +95,11 @@
                 </div>
             </div>
         </transition> 
-        <audio  ref="audio" @canplay="ready" @error="error" @timeupdate="timeupdate"></audio>      
+        <audio ref="audio" 
+        @canplay="ready" 
+        @error="error" 
+        @timeupdate="timeupdate"
+        @ended="playended"></audio>      
     </div>
 </template>
 <script>
@@ -106,7 +110,9 @@ import ProgressBar from "base/progress-bar/progress-bar";
 import { Base64 } from "js-base64";
 import Lyric from "lyric-parser";
 import Scroll from "base/scroll/scroll";
-import ProgressCircle from "base/progress-circle/progress-circle"
+import ProgressCircle from "base/progress-circle/progress-circle";
+import { playMode } from "common/js/config";
+
 export default {
   data() {
     return {
@@ -116,7 +122,7 @@ export default {
       lyric: null,
       currentLyricLineNum: 0,
       currentShow: "cd",
-      miniRadius:32
+      miniRadius: 32
     };
   },
   computed: {
@@ -135,12 +141,28 @@ export default {
     percent() {
       return this.currentTime / this.currentSong.duration;
     },
+    playmodeIcon() {
+      let modeClass = "";
+      switch (this.mode) {
+        case playMode.sequence:
+          modeClass = "icon-sequence";
+          break;
+        case playMode.loop:
+          modeClass = "icon-loop";
+          break;
+        case playMode.random:
+          modeClass = "icon-random";
+          break;
+      }
+      return modeClass;
+    },
     ...mapGetters([
       "playList",
       "fullScreen",
       "currentSong",
       "playing",
-      "currentIndex"
+      "currentIndex",
+      "mode"
     ])
   },
   created() {
@@ -202,7 +224,8 @@ export default {
         }
       });
     },
-    togglePlay(cdName) { //normalCd miniCD
+    togglePlay(cdName) {
+      //normalCd miniCD
       this.setPlayingstate(!this.playing);
 
       let audio = this.$refs.audio;
@@ -238,7 +261,13 @@ export default {
       if (!this.songReady && this.playing) {
         return;
       }
-      let index = this.currentIndex - 1;
+      let index = this.currentIndex;
+      if(this.mode === playMode.random){
+        index = Math.floor(Math.random()* this.playList.length);
+      }
+      else{
+        index = this.currentIndex - 1;
+      }
       if (index === -1) {
         index = this.playList.length - 1;
       }
@@ -250,7 +279,13 @@ export default {
       if (!this.songReady && this.playing) {
         return;
       }
-      let index = this.currentIndex + 1;
+      let index = this.currentIndex;
+      if(this.mode === playMode.random){
+        index = Math.floor(Math.random()* this.playList.length);
+      }
+      else{
+        index = this.currentIndex + 1;
+      }
       if (index === this.playList.length) {
         index = 0;
       }
@@ -341,6 +376,18 @@ export default {
       this.$refs.middleL.style.transition = "all 0.3s";
       this.$refs.middleL.style.opacity = opacity;
     },
+    changePlayMode(){
+        this.setPlayMode((this.mode+1)%3)
+    },
+    playended(){
+        if(this.mode === playMode.loop ){
+            this.$refs.audio.currentTime = 0;
+            this.$refs.audio.play()
+        }
+        else{
+            this.next();
+        }
+    },
     _getPosAndScale() {
       const targetWidth = 40;
       const paddingLeft = 40;
@@ -370,7 +417,8 @@ export default {
     ...mapMutations({
       setFullscreen: "SET_FULLSCREEN",
       setPlayingstate: "SET_PLAYING",
-      setCurrentIndex: "SET_CURRENINDEX"
+      setCurrentIndex: "SET_CURRENINDEX",
+      setPlayMode:'SET_MODE'
     })
   },
   watch: {

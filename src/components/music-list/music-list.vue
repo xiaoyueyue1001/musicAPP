@@ -6,7 +6,7 @@
         <div class="title">{{title}}</div>
         <div class="bg-image" :style="bgStyle" ref="bgImage">
             <div class="play-wrapper">
-                <div ref="playBtn" v-show="playBtnShow" class="play">
+                <div ref="playBtn" v-show="playBtnShow" class="play" @click="randomToPlay">
                     <i class="icon-play"></i>
                     <span class="text">随机播放全部</span>
                 </div>
@@ -85,7 +85,12 @@ export default {
         index: index
       });
     },
-    ...mapActions(["selectPlay"])
+    randomToPlay() {
+      this.randomPlay({
+        list: this.songs
+      });
+    },
+    ...mapActions(["selectPlay", "randomPlay"])
   },
   mounted() {
     this.bgImageHight = this.$refs.bgImage.clientHeight;
