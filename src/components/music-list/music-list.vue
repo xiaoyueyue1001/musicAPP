@@ -1,5 +1,5 @@
 <template>
-    <div class="music-list">
+    <div class="music-list" ref="musicList">
         <div class="back">
             <i class="icon-back" @click='back'></i>
         </div>
@@ -24,8 +24,8 @@
                 <song-list :songs="songs" @select="selectItem"></song-list>
             </div>
             <div v-show="!songs.length" class="loading-container">
-        <loading></loading>
-      </div>
+              <loading></loading>
+            </div>
         </scroll>
     </div>
 </template>
@@ -34,9 +34,11 @@ import Scroll from "base/scroll/scroll";
 import SongList from "base/song-list/song-list";
 import Loading from "base/loading/loading";
 import { mapActions } from "vuex";
+import { playlistMixin } from "common/js/mixin";
 
 const HEADERHEIGHT = 40;
 export default {
+  mixins: [playlistMixin],
   props: {
     title: {
       type: String,
@@ -89,6 +91,11 @@ export default {
       this.randomPlay({
         list: this.songs
       });
+    },
+    handlePlaylist(playList) {
+      let bottom = playList.length > 0 ? "60px" : "0px";
+      this.$refs.scroll.$el.style.bottom = bottom;
+      this.$refs.scroll.refresh();
     },
     ...mapActions(["selectPlay", "randomPlay"])
   },

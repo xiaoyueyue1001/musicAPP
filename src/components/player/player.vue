@@ -26,6 +26,9 @@
                                 <img class="image" :src="currentSong.image"  ref="normalCd">
                             </div>
                         </div>
+                        <div class="playing-lyric-wrapper">
+                            <div class="playing-lyric">{{playLyric}}</div>
+                        </div>
                     </div>
                     <scroll class="middle-r" :data="lyric&&lyric.lines" ref="lyricScroll">
                         <div class="lyric-wrapper">
@@ -122,7 +125,8 @@ export default {
       lyric: null,
       currentLyricLineNum: 0,
       currentShow: "cd",
-      miniRadius: 32
+      miniRadius: 32,
+      playLyric: ""
     };
   },
   computed: {
@@ -227,7 +231,10 @@ export default {
     togglePlay(cdName) {
       //normalCd miniCD
       this.setPlayingstate(!this.playing);
-
+      //歌词播放暂停切换
+      if (this.lyric) {
+        this.lyric.togglePlay();
+      }
       let audio = this.$refs.audio;
       if (this.playing) {
         this.$refs["normalCd"].classList.add("play");
@@ -262,10 +269,9 @@ export default {
         return;
       }
       let index = this.currentIndex;
-      if(this.mode === playMode.random){
-        index = Math.floor(Math.random()* this.playList.length);
-      }
-      else{
+      if (this.mode === playMode.random) {
+        index = Math.floor(Math.random() * this.playList.length);
+      } else {
         index = this.currentIndex - 1;
       }
       if (index === -1) {
@@ -280,10 +286,9 @@ export default {
         return;
       }
       let index = this.currentIndex;
-      if(this.mode === playMode.random){
-        index = Math.floor(Math.random()* this.playList.length);
-      }
-      else{
+      if (this.mode === playMode.random) {
+        index = Math.floor(Math.random() * this.playList.length);
+      } else {
         index = this.currentIndex + 1;
       }
       if (index === this.playList.length) {
@@ -312,10 +317,12 @@ export default {
     changePercentEnd(percent) {
       this.isDrag = false;
       this.$refs.audio.currentTime = this.currentSong.duration * percent;
+      this.lyric.seek(percent * this.currentSong.duration * 1000);
     },
     changePercentIng(percent) {
       this.isDrag = true;
       this.dragTime = percent * this.currentSong.duration;
+      this.lyric.seek(percent * this.currentSong.duration * 1000);
     },
     middleTouchstart(e) {
       this.touch.isStart = true;
@@ -376,17 +383,16 @@ export default {
       this.$refs.middleL.style.transition = "all 0.3s";
       this.$refs.middleL.style.opacity = opacity;
     },
-    changePlayMode(){
-        this.setPlayMode((this.mode+1)%3)
+    changePlayMode() {
+      this.setPlayMode((this.mode + 1) % 3);
     },
-    playended(){
-        if(this.mode === playMode.loop ){
-            this.$refs.audio.currentTime = 0;
-            this.$refs.audio.play()
-        }
-        else{
-            this.next();
-        }
+    playended() {
+      if (this.mode === playMode.loop) {
+        this.$refs.audio.currentTime = 0;
+        this.$refs.audio.play();
+      } else {
+        this.next();
+      }
     },
     _getPosAndScale() {
       const targetWidth = 40;
@@ -404,6 +410,7 @@ export default {
       };
     },
     _lyricCallback({ lineNum, txt }) {
+      this.playLyric = txt;
       this.currentLyricLineNum = lineNum;
       if (lineNum < 5) {
         this.$refs.lyricScroll._scrollTo(0, 0, 1000);
@@ -418,7 +425,7 @@ export default {
       setFullscreen: "SET_FULLSCREEN",
       setPlayingstate: "SET_PLAYING",
       setCurrentIndex: "SET_CURRENINDEX",
-      setPlayMode:'SET_MODE'
+      setPlayMode: "SET_MODE"
     })
   },
   watch: {
@@ -430,6 +437,9 @@ export default {
           this.$refs.normalPlay.click();
         });
       });
+      if (this.lyric) {
+        this.lyric.stop();
+      }
       getLyric(newSong.mid).then(res => {
         let lyric = Base64.decode(res.lyric);
         this.lyric = new Lyric(lyric, this._lyricCallback);

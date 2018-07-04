@@ -97,6 +97,9 @@ export default {
     itemClick(item) {
       this.$emit("itemClick", item);
     },
+    refresh() {
+      this.$refs.listview.refresh();
+    },
     _scroll(index, time = 0) {
       //快速切换两头无index值
       if (index === null) {
