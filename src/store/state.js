@@ -7,5 +7,6 @@ export default {
     playList: [],
     sequenceList: [],
     playMode: playMode.sequence,
-    currentIndex: -1
+    currentIndex: -1,
+    disc: {}
 }

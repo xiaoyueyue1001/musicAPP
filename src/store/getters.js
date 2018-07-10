@@ -6,5 +6,6 @@ export default {
     sequenceList: state => state.sequenceList,
     mode: state => state.playMode,
     currentIndex: state => state.currentIndex,
-    currentSong: state => state.playList[state.currentIndex] || {}
+    currentSong: state => state.playList[state.currentIndex] || {},
+    disc: state => state.disc
 }

@@ -25,11 +25,23 @@ export function createSong(songInfo) {
         id: songInfo.songid,
         mid: songInfo.songmid,
         singer: songInfo.singer ? songInfo.singer.map(singer => singer.name).join("/") : '未知',
-        name: songInfo.songname,
-        album: songInfo.albumname,
+        name: songInfo.songname || songInfo.name,
+        album: songInfo.albumname || songInfo.album.name,
         duration: songInfo.interval,
         image: `http://y.gtimg.cn/music/photo_new/T002R300x300M000${songInfo.albummid}.jpg?max_age=2592000`,
-        // url: `http://dl.stream.qqmusic.qq.com/C400${songmid}.m4a?vkey=${vkey}&guid=7833995540&uin=0&fromtag=66`,
         url: songInfo.songmid,
+    })
+}
+
+export function createSongByDisc(songInfo) {
+    return new Song({
+        id: songInfo.id,
+        mid: songInfo.mid,
+        singer: songInfo.singer ? songInfo.singer.map(singer => singer.name).join("/") : '未知',
+        name: songInfo.name,
+        album: songInfo.album.name,
+        duration: songInfo.interval,
+        image: `http://y.gtimg.cn/music/photo_new/T002R300x300M000${songInfo.album.mid}.jpg?max_age=2592000`,
+        url: songInfo.mid,
     })
 }

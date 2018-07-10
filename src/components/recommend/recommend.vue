@@ -14,47 +14,49 @@
         <div class="recommend-list" v-if="recommendData.songList">
           <h1 class="list-title">热门歌单推荐</h1>
           <ul>
-            <li v-for="(item,index) in songList" :key="index" class="item">
+            <li v-for="(item,index) in songList" :key="index" class="item" @click="selectSongList(item)">
               <div class="icon">
-                <img v-lazy="item.picUrl" alt="" width="60" height="60">
+                <img v-lazy="item.cover" alt="" width="60" height="60">
               </div>
               <div class="text">
-                <h2 class="name">{{item.songListAuthor}}</h2>
-                <h2 class="desc">{{item.songListDesc}}</h2>
+                <h2 class="name">{{item.title}}</h2>
+                <h2 class="desc">{{item.rcmdcontent}}</h2>
               </div>
             </li>
           </ul>
         </div>
       </div>
       <div class="loading-container">
-        <loading v-show="!recommendData.songList"></loading>
+        <loading v-show="recommendData.songList.length === 0"></loading>
       </div>
     </scroll>
+    <router-view></router-view>
   </div>
 </template>
 <script>
-import { getRecommend } from "api/recommend";
+import { getRecommend, getRecommendSonglist } from "api/recommend";
 import Slider from "base/slider/slider";
 import Scroll from "base/scroll/scroll";
 import Loading from "base/loading/loading";
 import { playlistMixin } from "common/js/mixin";
+import { mapMutations } from "vuex";
 export default {
   mixins: [playlistMixin],
   data() {
     return {
-      recommendData: {}
+      recommendData: {
+        songList: []
+      }
     };
   },
   computed: {
     songList() {
       return [
         ...this.recommendData.songList,
-        ...this.recommendData.songList,
-        ...this.recommendData.songList,
         {
-          picUrl: "11111",
-          songListAuthor: "wangyue",
-          songListDesc: "人造无效地址"
+          cover: "11111",
+          rcmdcontent: "wangyue",
+          title: "人造无效地址"
         }
       ];
     }
@@ -68,13 +70,29 @@ export default {
       this.$refs.recommend.style.bottom = bottom;
       this.$refs.list.refresh();
     },
+    selectSongList(item) {
+      this.setDisc(item);
+      this.$router.push({
+        path: `recommend/${item.id}`
+      });
+    },
     _getRecommend() {
       getRecommend().then(res => {
         if (res.code === 0) {
-          this.recommendData = res.data;
+          this.recommendData.slider = res.data.slider;
         }
       });
-    }
+
+      getRecommendSonglist().then(res => {
+        if (res.code === 0) {
+          this.recommendData.songList = res.recomPlaylist.data.v_hot;
+          console.log(this.recommendData);
+        }
+      });
+    },
+    ...mapMutations({
+      setDisc: "SET_DISC"
+    })
   },
   components: {
     Slider,
