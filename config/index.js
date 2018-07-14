@@ -68,6 +68,7 @@ module.exports = {
         }
       },
 
+      //推荐页歌单的歌曲列表
       '/getSongListByDiscId': {
         target: 'https://c.y.qq.com/qzone/fcg-bin/fcg_ucc_getcdinfo_byids_cp.fcg',
         changeOrigin: true,
@@ -78,6 +79,20 @@ module.exports = {
         pathRewrite: {
           '^/getSongListByDiscId': ""
         }
+      },
+
+      //获取排行榜数据
+      "/getRankData": {
+        target: 'https://c.y.qq.com/v8/fcg-bin/fcg_myqq_toplist.fcg',
+        changeOrigin: true,
+        bypass: function (req, res, proxyOptions) {
+          req.headers.referer = 'https://y.qq.com/m/index.html'
+          req.headers.host = 'c.y.qq.com'
+          // req.headers.host = 'https://y.qq.com'
+        },
+        pathRewrite: {
+          '^/getRankData': ""
+        },
       }
     },
 
