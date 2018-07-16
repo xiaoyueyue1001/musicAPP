@@ -93,6 +93,20 @@ module.exports = {
         pathRewrite: {
           '^/getRankData': ""
         },
+      },
+
+      //获取具体排行榜歌单数据
+      "/getTopListData": {
+        target: 'https://c.y.qq.com/v8/fcg-bin/fcg_v8_toplist_cp.fcg',
+        changeOrigin: true,
+        bypass: function (req, res, proxyOptions) {
+          req.headers.referer = 'https://y.qq.com/w/toplist.html'
+          req.headers.host = 'c.y.qq.com'
+          // req.headers.host = 'https://y.qq.com'
+        },
+        pathRewrite: {
+          '^/getTopListData': ""
+        },
       }
     },
 

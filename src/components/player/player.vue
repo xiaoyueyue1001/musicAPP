@@ -437,10 +437,10 @@ export default {
           this.$refs.normalPlay.click();
         });
       });
-      if (this.lyric) {
-        this.lyric.stop();
-      }
       getLyric(newSong.mid).then(res => {
+        if (this.lyric) {
+          this.lyric.stop();
+        }
         let lyric = Base64.decode(res.lyric);
         this.lyric = new Lyric(lyric, this._lyricCallback);
         if (this.playing) {
