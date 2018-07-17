@@ -1,6 +1,6 @@
 <template>
   <transition name="slide">
-    <music-list :title="title" :avatar="imgUrl" :songs="songs"></music-list>
+    <music-list :title="title" :avatar="imgUrl" :songs="songs" :isRank="isRank"></music-list>
   </transition>
 </template>
 
@@ -12,7 +12,8 @@ import { createSong } from "common/js/commonClass";
 export default {
   data() {
     return {
-      albumInfo: {}
+      albumInfo: {},
+      isRank: true
     };
   },
   computed: {

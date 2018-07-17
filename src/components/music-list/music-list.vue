@@ -21,7 +21,7 @@
                 :listen-scroll='listenScroll'
                 @scroll="scroll">
             <div class="song-list-wrapper">
-                <song-list :songs="songs" @select="selectItem"></song-list>
+                <song-list :songs="songs" @select="selectItem" :isRank="isRank"></song-list>
             </div>
             <div v-show="!songs.length" class="loading-container">
               <loading></loading>
@@ -53,6 +53,10 @@ export default {
       default() {
         return [];
       }
+    },
+    isRank: {
+      type: Boolean,
+      default: false
     }
   },
   data() {

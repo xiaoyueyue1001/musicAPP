@@ -1,6 +1,6 @@
 <template>
-    <div class="rank" :data="songLists">
-        <scroll class="toplist">
+    <div class="rank" :data="songLists" ref="rank">
+        <scroll class="toplist" ref="list">
             <ul>
                 <li class="item" v-for="item in songLists" :key="item.id" @click="selectId(item.id)">
                     <div class="icon">
@@ -22,8 +22,10 @@
 <script>
 import { getRankData } from "api/rank";
 import Scroll from "base/scroll/scroll";
+import { playlistMixin } from "common/js/mixin";
 
 export default {
+  mixins: [playlistMixin],
   created() {
     this._getTopList();
   },
@@ -37,6 +39,11 @@ export default {
       this.$router.push({
         path: `/rank/${id}`
       });
+    },
+    handlePlaylist(playList) {
+      let bottom = playList.length > 0 ? "60px" : "0px";
+      this.$refs.rank.style.bottom = bottom;
+      this.$refs.list.refresh();
     },
     _getTopList() {
       getRankData().then(data => {
