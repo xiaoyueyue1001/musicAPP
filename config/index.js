@@ -107,6 +107,18 @@ module.exports = {
         pathRewrite: {
           '^/getTopListData': ""
         },
+      },
+      "/getHotKeys": {
+        target: 'https://c.y.qq.com/splcloud/fcgi-bin/gethotkey.fcg',
+        changeOrigin: true,
+        bypass: function (req, res, proxyOptions) {
+          req.headers.referer = 'https://y.qq.com/m/index.html'
+          req.headers.host = 'c.y.qq.com'
+          // req.headers.host = 'https://y.qq.com'
+        },
+        pathRewrite: {
+          '^/getHotKeys': ""
+        }
       }
     },
 
