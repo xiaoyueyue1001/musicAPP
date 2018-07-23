@@ -108,6 +108,8 @@ module.exports = {
           '^/getTopListData': ""
         },
       },
+
+      //获取搜索页热门搜索词条
       "/getHotKeys": {
         target: 'https://c.y.qq.com/splcloud/fcgi-bin/gethotkey.fcg',
         changeOrigin: true,
@@ -118,6 +120,20 @@ module.exports = {
         },
         pathRewrite: {
           '^/getHotKeys': ""
+        }
+      },
+
+      //获取搜索页搜索结果
+      "/getSearchData": {
+        target: 'https://c.y.qq.com/soso/fcgi-bin/search_for_qq_cp',
+        changeOrigin: true,
+        bypass: function (req, res, proxyOptions) {
+          req.headers.referer = 'https://y.qq.com/m/index.html'
+          req.headers.host = 'c.y.qq.com'
+          // req.headers.host = 'https://y.qq.com'
+        },
+        pathRewrite: {
+          '^/getSearchData': ""
         }
       }
     },

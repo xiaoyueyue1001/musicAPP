@@ -19,6 +19,11 @@ export default {
       keyWords: ""
     };
   },
+  created() {
+    this.$watch("keyWords", Newquery => {
+      this.$emit("queryChang", Newquery);
+    });
+  },
   methods: {
     setQuery(query) {
       this.keyWords = query;
@@ -35,36 +40,36 @@ export default {
 @import '~common/stylus/variable';
 
 .search-box {
-    display: flex;
-    align-items: center;
-    box-sizing: border-box;
-    width: 100%;
-    padding: 0 6px;
-    height: 40px;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100%;
+  padding: 0 6px;
+  height: 40px;
+  background: $color-highlight-background;
+  border-radius: 6px;
+
+  .icon-search {
+    font-size: 24px;
+    color: $color-background;
+  }
+
+  .box {
+    flex: 1;
+    margin: 0 5px;
+    line-height: 18px;
     background: $color-highlight-background;
-    border-radius: 6px;
+    color: $color-text;
+    font-size: $font-size-medium;
 
-    .icon-search {
-        font-size: 24px;
-        color: $color-background;
+    &::placeholder {
+      color: $color-text-d;
     }
+  }
 
-    .box {
-        flex: 1;
-        margin: 0 5px;
-        line-height: 18px;
-        background: $color-highlight-background;
-        color: $color-text;
-        font-size: $font-size-medium;
-
-        &::placeholder {
-            color: $color-text-d;
-        }
-    }
-
-    .icon-dismiss {
-        font-size: 16px;
-        color: $color-background;
-    }
+  .icon-dismiss {
+    font-size: 16px;
+    color: $color-background;
+  }
 }
 </style>
