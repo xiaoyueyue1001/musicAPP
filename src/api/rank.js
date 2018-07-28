@@ -15,18 +15,13 @@ export function getRankData() {
         needNewCode: 1,
         _: 1531485004927,
     }
-    // return jsonp(url, data, {
-    //     param: 'jsonpCallback'
-    // })
 
     return new Promise((resolve, reject) => {
-        axios({
-            method,
-            url,
-            data
+        axios.get(url, {
+            params: data
         }).then(res => {
             let data = res.data;
-            data = jsonp2obj(data);
+            // data = jsonp2obj(data);
             resolve(data)
         }).catch(err => {
             reject(err)
@@ -53,23 +48,21 @@ export function getTopListData(topid) {
         topid,
         _: 1531552347162
     }
-    return jsonp(url, data, {
-        param: 'jsonpCallback'
-    })
-
-    // return new Promise((resolve, reject) => {
-    //     axios({
-    //         method,
-    //         url,
-    //         data
-    //     }).then(res => {
-    //         let data = res.data;
-    //         // data = jsonp2obj(data);
-    //         resolve(data)
-    //     }).catch(err => {
-    //         reject(err)
-    //     })
+    // return jsonp(url, data, {
+    //     param: 'jsonpCallback'
     // })
+
+    return new Promise((resolve, reject) => {
+        axios.get(url, {
+            params: data
+        }).then(res => {
+            let data = res.data;
+            // data = jsonp2obj(data);
+            resolve(data)
+        }).catch(err => {
+            reject(err)
+        })
+    })
 }
 
 function jsonp2obj(str) {
