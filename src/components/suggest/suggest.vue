@@ -1,5 +1,5 @@
 <template>
-    <div class="suggest">
+    <scroll class="suggest" :data="searchData" :pullup="pullup" @scrollToEnd="searchMore" ref="suggest">
         <ul class="suggest-list">
             <li class="suggest-item" v-for="(item,index) in searchData" :key="index">
                 <div class="icon">
@@ -9,12 +9,15 @@
                     <p class="text" v-html="getTestCls(item)"></p>
                 </div>
             </li>
+            <loading v-show="isMoreData"></loading>
         </ul>
-    </div>
+    </scroll>
 </template>
 
 <script>
 import { getSearchData } from "api/search";
+import Scroll from "base/scroll/scroll";
+import Loading from "base/loading/loading";
 
 export default {
   props: {
@@ -29,8 +32,10 @@ export default {
   },
   data() {
     return {
+      pullup: true,
       page: 1,
-      searchData: []
+      searchData: [],
+      isMoreData: true
     };
   },
   methods: {
@@ -50,10 +55,28 @@ export default {
           .join("/")}`;
       }
     },
+    searchMore() {
+      if (!this.isMoreData) {
+        return;
+      }
+      this.page++;
+      getSearchData(this.query, this.page, this.isNeedSinger).then(res => {
+        if (res.code === 0) {
+          this.searchData = this.searchData.concat(
+            this._formatSearchData(res.data)
+          );
+          this._checkMore(res);
+        }
+      });
+    },
     _querySongList(query, page, isNeedSinger) {
+      this.page = 1;
+      this.isMoreData = true;
+      this.$refs.suggest._scrollTo(0, 0);
       getSearchData(query, page, isNeedSinger).then(res => {
         if (res.code === 0) {
           this.searchData = this._formatSearchData(res.data);
+          this._checkMore(res);
         }
       });
     },
@@ -66,12 +89,26 @@ export default {
         result = result.concat(data.song.list);
       }
       return result;
+    },
+    _checkMore(res) {
+      if (
+        res.data.song.curpage * res.data.song.curnum >=
+          res.data.song.totalnum ||
+        res.data.song.list.length === 0
+      ) {
+        this.isMoreData = false;
+      }
     }
   },
+
   watch: {
     query() {
       this._querySongList(this.query, this.page, this.isNeedSinger);
     }
+  },
+  components: {
+    Scroll,
+    Loading
   }
 };
 </script>
@@ -82,45 +119,45 @@ export default {
 @import '~common/stylus/mixin';
 
 .suggest {
-    height: 100%;
-    overflow: hidden;
+  height: 100%;
+  overflow: hidden;
 
-    .suggest-list {
-        padding: 0 30px;
+  .suggest-list {
+    padding: 0 30px;
 
-        .suggest-item {
-            display: flex;
-            align-items: center;
-            padding-bottom: 20px;
-        }
-
-        .icon {
-            flex: 0 0 30px;
-            width: 30px;
-
-            [class^='icon-'] {
-                font-size: 14px;
-                color: $color-text-d;
-            }
-        }
-
-        .name {
-            flex: 1;
-            font-size: $font-size-medium;
-            color: $color-text-d;
-            overflow: hidden;
-
-            .text {
-                no-wrap();
-            }
-        }
+    .suggest-item {
+      display: flex;
+      align-items: center;
+      padding-bottom: 20px;
     }
 
-    .no-result-wrapper {
-        position: absolute;
-        width: 100%;
-        top: 50%;
-        transform: translateY(-50%);
+    .icon {
+      flex: 0 0 30px;
+      width: 30px;
+
+      [class^='icon-'] {
+        font-size: 14px;
+        color: $color-text-d;
+      }
     }
+
+    .name {
+      flex: 1;
+      font-size: $font-size-medium;
+      color: $color-text-d;
+      overflow: hidden;
+
+      .text {
+        no-wrap();
+      }
+    }
+  }
+
+  .no-result-wrapper {
+    position: absolute;
+    width: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+  }
 }
 </style>

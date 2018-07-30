@@ -22,6 +22,10 @@ export default {
     listenScroll: {
       type: Boolean,
       default: false
+    },
+    pullup: {
+      type: Boolean,
+      default: false
     }
   },
   mounted() {
@@ -42,6 +46,15 @@ export default {
         let me = this;
         this.scroll.on("scroll", pos => {
           me.$emit("scroll", pos);
+        });
+      }
+
+      //监听下滑到底时派发事件(用于下拉加载)
+      if (this.pullup) {
+        this.scroll.on("scrollEnd", () => {
+          if (this.scroll.y <= this.scroll.maxScrollY + 50) {
+            this.$emit("scrollToEnd");
+          }
         });
       }
     },
