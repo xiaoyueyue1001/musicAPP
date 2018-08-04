@@ -7,6 +7,8 @@
 </template>
 
 <script type="text/ecmascript-6">
+import { debounce } from "common/js/dom";
+
 export default {
   props: {
     placeholder: {
@@ -20,9 +22,12 @@ export default {
     };
   },
   created() {
-    this.$watch("keyWords", Newquery => {
-      this.$emit("queryChang", Newquery);
-    });
+    this.$watch(
+      "keyWords",
+      debounce(Newquery => {
+        this.$emit("queryChang", Newquery);
+      }, 500)
+    );
   },
   methods: {
     setQuery(query) {

@@ -12,3 +12,19 @@ export function hasClass(el, className) {
     let reg = new RegExp('(^|\\s)' + className + '(\\s|$)');
     return reg.test(el.className)
 }
+
+//函数去抖
+export function debounce(func, delay) {
+    // debugger
+    let timer
+    return function (...args) {
+        if (timer) {
+            clearTimeout(timer)
+        }
+
+        timer = setTimeout(() => {
+            func.apply(this, args)
+        }, delay)
+
+    }
+}

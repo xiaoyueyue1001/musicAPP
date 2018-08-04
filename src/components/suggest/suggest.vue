@@ -1,7 +1,10 @@
 <template>
     <scroll class="suggest" :data="searchData" :pullup="pullup" @scrollToEnd="searchMore" ref="suggest">
         <ul class="suggest-list">
-            <li class="suggest-item" v-for="(item,index) in searchData" :key="index">
+            <li class="suggest-item" 
+                v-for="(item,index) in searchData" 
+                :key="index"
+                @click="selectItem(item)">
                 <div class="icon">
                     <i :class="getIconCls(item)"></i>
                 </div>
@@ -11,13 +14,19 @@
             </li>
             <loading v-show="isMoreData"></loading>
         </ul>
-    </scroll>
+        <div class="no-result-wrapper" v-show="!isMoreData && !searchData.length">
+          <no-result title="抱歉，暂无搜索结果"></no-result>
+        </div>
+    </scroll>    
 </template>
 
 <script>
 import { getSearchData } from "api/search";
 import Scroll from "base/scroll/scroll";
 import Loading from "base/loading/loading";
+import { mapMutations, mapActions } from "vuex";
+import { Singer, createSong } from "common/js/commonClass";
+import NoResult from "base/no-result/no-result";
 
 export default {
   props: {
@@ -69,6 +78,19 @@ export default {
         }
       });
     },
+    selectItem(item) {
+      console.log(item);
+      if (item.type === "singer") {
+        let singer = new Singer(item.singerid, item.singername, item.singermid);
+        this.setSinger(singer);
+        this.$router.push({
+          path: `/search/${item.singerid}`
+        });
+      } else {
+        let song = createSong(item);
+        this.insertSong(song);
+      }
+    },
     _querySongList(query, page, isNeedSinger) {
       this.page = 1;
       this.isMoreData = true;
@@ -98,7 +120,11 @@ export default {
       ) {
         this.isMoreData = false;
       }
-    }
+    },
+    ...mapMutations({
+      setSinger: "SET_SINGER"
+    }),
+    ...mapActions(["insertSong"])
   },
 
   watch: {
@@ -108,7 +134,8 @@ export default {
   },
   components: {
     Scroll,
-    Loading
+    Loading,
+    NoResult
   }
 };
 </script>
