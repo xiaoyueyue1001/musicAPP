@@ -14,7 +14,7 @@
             </div>
         </div>
         <div class="search-result" v-show="query">
-            <suggest :query="query"></suggest>
+            <suggest :query="query" @selected="AddKeywordToSearchHisyory"></suggest>
         </div>
         <router-view></router-view>
     </div>
@@ -23,6 +23,8 @@
 import SearchBox from "base/search-box/search-box";
 import { getHotKeys } from "api/search";
 import Suggest from "components/suggest/suggest";
+import { saveSearchHistory } from "common/js/cache";
+import { mapMutations } from "vuex";
 export default {
   created() {
     this._getHotKeys();
@@ -40,6 +42,10 @@ export default {
     queryChang(query) {
       this.query = query;
     },
+    AddKeywordToSearchHisyory() {
+      let list = saveSearchHistory(this.query);
+      this.setSearchHistory(list);
+    },
     _getHotKeys() {
       getHotKeys()
         .then(res => {
@@ -48,7 +54,10 @@ export default {
         .catch(err => {
           console.log(err);
         });
-    }
+    },
+    ...mapMutations({
+      setSearchHistory: "SET_SEARCHHISTORY"
+    })
   },
   components: {
     SearchBox,

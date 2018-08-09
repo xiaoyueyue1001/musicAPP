@@ -79,7 +79,6 @@ export default {
       });
     },
     selectItem(item) {
-      console.log(item);
       if (item.type === "singer") {
         let singer = new Singer(item.singerid, item.singername, item.singermid);
         this.setSinger(singer);
@@ -90,6 +89,7 @@ export default {
         let song = createSong(item);
         this.insertSong(song);
       }
+      this.$emit("selected");
     },
     _querySongList(query, page, isNeedSinger) {
       this.page = 1;

@@ -24,5 +24,8 @@ export default {
     },
     [types.SET_DISC](state, disc) {
         state.disc = disc
+    },
+    [types.SET_SEARCHHISTORY](state, list) {
+        state.searchHistory = list
     }
 }
