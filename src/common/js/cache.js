@@ -20,7 +20,7 @@ let myLocalStorage = {
 }
 
 
-export function saveSearchHistory(value) {
+export function insert2Cache(value) {
     let list = myLocalStorage.get(SEARCH_HISTORY_KEY, [])
     let index = list.indexOf(value);
     if (index === -1) {
@@ -39,6 +39,19 @@ export function saveSearchHistory(value) {
     myLocalStorage.set(SEARCH_HISTORY_KEY, list)
 
     return list
+}
+
+export function delete2Cache(value) {
+    let list = myLocalStorage.get(SEARCH_HISTORY_KEY, [])
+    let index = list.indexOf(value);
+    list.splice(index, 1)
+    myLocalStorage.set(SEARCH_HISTORY_KEY, list)
+    return list
+}
+
+export function clearCache() {
+    myLocalStorage.set(SEARCH_HISTORY_KEY, [])
+    return []
 }
 
 export function getSearchHistory() {

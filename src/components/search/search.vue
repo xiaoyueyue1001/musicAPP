@@ -11,7 +11,16 @@
                         <li class="item" v-for="item in hotKeys" :key="item.n" @click="selectKey(item.k)">{{item.k}}</li>
                     </ul>
                 </div>
+                <div class="search-history">
+                <div class="title">
+                    <span class="text">搜索历史</span>
+                    <span class="clear" @click="clearAll">
+                        <i class="icon-clear"></i>
+                    </span>
+                </div>
+                <search-list :searches="searchHistory" @selectOne="selectKey" @deleteOne="deleteOne"></search-list>
             </div>
+            </div>            
         </div>
         <div class="search-result" v-show="query">
             <suggest :query="query" @selected="AddKeywordToSearchHisyory"></suggest>
@@ -23,8 +32,9 @@
 import SearchBox from "base/search-box/search-box";
 import { getHotKeys } from "api/search";
 import Suggest from "components/suggest/suggest";
-import { saveSearchHistory } from "common/js/cache";
-import { mapMutations } from "vuex";
+import { insert2Cache, delete2Cache, clearCache } from "common/js/cache";
+import { mapMutations, mapGetters } from "vuex";
+import SearchList from "base/search-list/search-list";
 export default {
   created() {
     this._getHotKeys();
@@ -35,6 +45,9 @@ export default {
       query: ""
     };
   },
+  computed: {
+    ...mapGetters(["searchHistory"])
+  },
   methods: {
     selectKey(key) {
       this.$refs.searchBox.setQuery(key);
@@ -43,8 +56,16 @@ export default {
       this.query = query;
     },
     AddKeywordToSearchHisyory() {
-      let list = saveSearchHistory(this.query);
+      let list = insert2Cache(this.query);
       this.setSearchHistory(list);
+    },
+    deleteOne(query) {
+      let list = delete2Cache(query);
+      this.setSearchHistory(list);
+    },
+    clearAll() {
+      clearCache();
+      this.setSearchHistory([]);
     },
     _getHotKeys() {
       getHotKeys()
@@ -61,7 +82,8 @@ export default {
   },
   components: {
     SearchBox,
-    Suggest
+    Suggest,
+    SearchList
   }
 };
 </script>
