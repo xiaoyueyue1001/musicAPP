@@ -22,8 +22,8 @@
             </div>
             </div>            
         </div>
-        <div class="search-result" v-show="query">
-            <suggest :query="query" @selected="AddKeywordToSearchHisyory"></suggest>
+        <div class="search-result" v-show="query" ref="suggestWrapper">
+            <suggest :query="query" @selected="AddKeywordToSearchHisyory" ref="suggest"></suggest>
         </div>
         <confirm text="是否删除搜索历史？" 
         v-show="confirmShow"
@@ -40,7 +40,9 @@ import { insert2Cache, delete2Cache, clearCache } from "common/js/cache";
 import { mapMutations, mapGetters } from "vuex";
 import SearchList from "base/search-list/search-list";
 import Confirm from "base/confirm/confirm";
+import { playlistMixin } from "common/js/mixin";
 export default {
+  mixins: [playlistMixin],
   created() {
     this._getHotKeys();
   },
@@ -81,6 +83,11 @@ export default {
     },
     confirmBoxCancel() {
       this.confirmShow = false;
+    },
+    handlePlaylist(playList) {
+      let bottom = playList.length > 0 ? "60px" : "0px";
+      this.$refs.suggestWrapper.style.bottom = bottom;
+      this.$refs.suggest.refresh();
     },
     _getHotKeys() {
       getHotKeys()

@@ -91,6 +91,9 @@ export default {
       }
       this.$emit("selected");
     },
+    refresh() {
+      this.$refs.suggest.refresh();
+    },
     _querySongList(query, page, isNeedSinger) {
       this.page = 1;
       this.isMoreData = true;
