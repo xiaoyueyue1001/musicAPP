@@ -25,6 +25,10 @@
         <div class="search-result" v-show="query">
             <suggest :query="query" @selected="AddKeywordToSearchHisyory"></suggest>
         </div>
+        <confirm text="是否删除搜索历史？" 
+        v-show="confirmShow"
+        @confirm="confirmBoxConfirm"
+        @cancel="confirmBoxCancel"></confirm>
         <router-view></router-view>
     </div>
 </template>
@@ -35,14 +39,16 @@ import Suggest from "components/suggest/suggest";
 import { insert2Cache, delete2Cache, clearCache } from "common/js/cache";
 import { mapMutations, mapGetters } from "vuex";
 import SearchList from "base/search-list/search-list";
+import Confirm from "base/confirm/confirm";
 export default {
   created() {
     this._getHotKeys();
   },
   data() {
     return {
-      hotKeys: [],
-      query: ""
+      hotKeys: [], //热门搜索词条
+      query: "", //搜索栏的词条
+      confirmShow: false //弹窗显示
     };
   },
   computed: {
@@ -64,8 +70,17 @@ export default {
       this.setSearchHistory(list);
     },
     clearAll() {
+      this.confirmShow = true;
+      //   clearCache();
+      //   this.setSearchHistory([]);
+    },
+    confirmBoxConfirm() {
       clearCache();
       this.setSearchHistory([]);
+      this.confirmShow = false;
+    },
+    confirmBoxCancel() {
+      this.confirmShow = false;
     },
     _getHotKeys() {
       getHotKeys()
@@ -83,7 +98,8 @@ export default {
   components: {
     SearchBox,
     Suggest,
-    SearchList
+    SearchList,
+    Confirm
   }
 };
 </script>
